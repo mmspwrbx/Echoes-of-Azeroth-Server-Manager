@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <data name="AppName" xml:space="preserve"><value>Echoes of Azeroth</value></data>
+  <data name="ServerManager" xml:space="preserve"><value>Server Manager</value></data>
+  <data name="ServerStatus" xml:space="preserve"><value>Server status</value></data>
+  <data name="ServerOnline" xml:space="preserve"><value>SERVER ONLINE</value></data>
+  <data name="ServerOffline" xml:space="preserve"><value>SERVER OFFLINE</value></data>
+  <data name="Database" xml:space="preserve"><value>Database</value></data>
+  <data name="AuthServer" xml:space="preserve"><value>Auth Server</value></data>
+  <data name="WorldServer" xml:space="preserve"><value>World Server</value></data>
+  <data name="Running" xml:space="preserve"><value>Running</value></data>
+  <data name="Stopped" xml:space="preserve"><value>Stopped</value></data>
+  <data name="Starting" xml:space="preserve"><value>Starting</value></data>
+  <data name="Stopping" xml:space="preserve"><value>Stopping</value></data>
+  <data name="Error" xml:space="preserve"><value>Error</value></data>
+  <data name="Start" xml:space="preserve"><value>Start</value></data>
+  <data name="Stop" xml:space="preserve"><value>Stop</value></data>
+  <data name="Restart" xml:space="preserve"><value>Restart</value></data>
+  <data name="StartServer" xml:space="preserve"><value>START SERVER</value></data>
+  <data name="StopServer" xml:space="preserve"><value>STOP SERVER</value></data>
+  <data name="RestartServer" xml:space="preserve"><value>RESTART SERVER</value></data>
+  <data name="Logs" xml:space="preserve"><value>Logs</value></data>
+  <data name="World" xml:space="preserve"><value>World</value></data>
+  <data name="Auth" xml:space="preserve"><value>Auth</value></data>
+  <data name="Manager" xml:space="preserve"><value>Manager</value></data>
+  <data name="ConsoleCommand" xml:space="preserve"><value>Enter a worldserver command…</value></data>
+  <data name="Send" xml:space="preserve"><value>Send</value></data>
+  <data name="Settings" xml:space="preserve"><value>Settings</value></data>
+  <data name="Language" xml:space="preserve"><value>Language</value></data>
+  <data name="ServerRootPath" xml:space="preserve"><value>Server root directory</value></data>
+  <data name="MySqlServiceName" xml:space="preserve"><value>MySQL service name</value></data>
+  <data name="MySqlPort" xml:space="preserve"><value>MySQL port</value></data>
+  <data name="AuthServerExecutable" xml:space="preserve"><value>AuthServer executable</value></data>
+  <data name="AuthServerArguments" xml:space="preserve"><value>AuthServer arguments</value></data>
+  <data name="AuthServerPort" xml:space="preserve"><value>AuthServer port</value></data>
+  <data name="WorldServerExecutable" xml:space="preserve"><value>WorldServer executable</value></data>
+  <data name="WorldServerArguments" xml:space="preserve"><value>WorldServer arguments</value></data>
+  <data name="WorldServerPort" xml:space="preserve"><value>WorldServer port</value></data>
+  <data name="StartupTimeout" xml:space="preserve"><value>Startup timeout (seconds)</value></data>
+  <data name="GracefulShutdownTimeout" xml:space="preserve"><value>Graceful shutdown timeout (seconds)</value></data>
+  <data name="LogsDirectory" xml:space="preserve"><value>Logs directory</value></data>
+  <data name="SaveSettings" xml:space="preserve"><value>Save settings</value></data>
+  <data name="SettingsSaved" xml:space="preserve"><value>Settings were saved.</value></data>
+  <data name="ConfigurationWarning" xml:space="preserve"><value>Configuration needs attention</value></data>
+  <data name="Port" xml:space="preserve"><value>Port</value></data>
+  <data name="Open" xml:space="preserve"><value>open</value></data>
+  <data name="Closed" xml:space="preserve"><value>closed</value></data>
+  <data name="Confirmation" xml:space="preserve"><value>Confirmation</value></data>
+  <data name="ErrorTitle" xml:space="preserve"><value>Server Manager</value></data>
+  <data name="DatabaseNotRunningStart" xml:space="preserve"><value>Database is not running. Start it first?</value></data>
+  <data name="DatabaseHasDependentsStop" xml:space="preserve"><value>AuthServer or WorldServer is running. Stop dependent services first?</value></data>
+  <data name="DatabaseRestartDependents" xml:space="preserve"><value>Dependent services are running. Stop them safely, restart the database, and start them again?</value></data>
+  <data name="WorldNotRunning" xml:space="preserve"><value>WorldServer is not running.</value></data>
+  <data name="WorldNotManaged" xml:space="preserve"><value>The running WorldServer was started outside this manager, so its standard input is unavailable.</value></data>
+  <data name="InvalidSettings" xml:space="preserve"><value>Check paths, ports, and timeout values before saving.</value></data>
+  <data name="OperationFailed" xml:space="preserve"><value>The operation failed. See the Manager log for details.</value></data>
+  <data name="ValidationServerRootMissing" xml:space="preserve"><value>Server root directory does not exist</value></data>
+  <data name="ValidationAuthMissing" xml:space="preserve"><value>AuthServer executable was not found</value></data>
+  <data name="ValidationWorldMissing" xml:space="preserve"><value>WorldServer executable was not found</value></data>
+  <data name="ValidationConfigsMissing" xml:space="preserve"><value>Configs directory does not exist</value></data>
+  <data name="ValidationAuthConfigMissing" xml:space="preserve"><value>authserver.conf was not found</value></data>
+  <data name="ValidationWorldConfigMissing" xml:space="preserve"><value>worldserver.conf was not found</value></data>
+  <data name="ValidationMySqlMissing" xml:space="preserve"><value>MySQL Windows service was not found</value></data>
+  <data name="ValidationAdminRequired" xml:space="preserve"><value>Administrator privileges are required to control Windows services</value></data>
+</root>
+

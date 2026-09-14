@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <data name="AppName" xml:space="preserve"><value>Echoes of Azeroth</value></data>
+  <data name="ServerManager" xml:space="preserve"><value>Менеджер сервера</value></data>
+  <data name="ServerStatus" xml:space="preserve"><value>Состояние сервера</value></data>
+  <data name="ServerOnline" xml:space="preserve"><value>СЕРВЕР ЗАПУЩЕН</value></data>
+  <data name="ServerOffline" xml:space="preserve"><value>СЕРВЕР ОСТАНОВЛЕН</value></data>
+  <data name="Database" xml:space="preserve"><value>База данных</value></data>
+  <data name="AuthServer" xml:space="preserve"><value>Сервер авторизации</value></data>
+  <data name="WorldServer" xml:space="preserve"><value>Игровой сервер</value></data>
+  <data name="Running" xml:space="preserve"><value>Работает</value></data>
+  <data name="Stopped" xml:space="preserve"><value>Остановлен</value></data>
+  <data name="Starting" xml:space="preserve"><value>Запускается</value></data>
+  <data name="Stopping" xml:space="preserve"><value>Останавливается</value></data>
+  <data name="Error" xml:space="preserve"><value>Ошибка</value></data>
+  <data name="Start" xml:space="preserve"><value>Запустить</value></data>
+  <data name="Stop" xml:space="preserve"><value>Остановить</value></data>
+  <data name="Restart" xml:space="preserve"><value>Перезапустить</value></data>
+  <data name="StartServer" xml:space="preserve"><value>ЗАПУСТИТЬ СЕРВЕР</value></data>
+  <data name="StopServer" xml:space="preserve"><value>ОСТАНОВИТЬ СЕРВЕР</value></data>
+  <data name="RestartServer" xml:space="preserve"><value>ПЕРЕЗАПУСТИТЬ СЕРВЕР</value></data>
+  <data name="Logs" xml:space="preserve"><value>Логи</value></data>
+  <data name="World" xml:space="preserve"><value>Мир</value></data>
+  <data name="Auth" xml:space="preserve"><value>Авторизация</value></data>
+  <data name="Manager" xml:space="preserve"><value>Менеджер</value></data>
+  <data name="ConsoleCommand" xml:space="preserve"><value>Введите команду worldserver…</value></data>
+  <data name="Send" xml:space="preserve"><value>Отправить</value></data>
+  <data name="Settings" xml:space="preserve"><value>Настройки</value></data>
+  <data name="Language" xml:space="preserve"><value>Язык</value></data>
+  <data name="ServerRootPath" xml:space="preserve"><value>Корневая папка сервера</value></data>
+  <data name="MySqlServiceName" xml:space="preserve"><value>Имя службы MySQL</value></data>
+  <data name="MySqlPort" xml:space="preserve"><value>Порт MySQL</value></data>
+  <data name="AuthServerExecutable" xml:space="preserve"><value>Файл AuthServer</value></data>
+  <data name="AuthServerArguments" xml:space="preserve"><value>Аргументы AuthServer</value></data>
+  <data name="AuthServerPort" xml:space="preserve"><value>Порт AuthServer</value></data>
+  <data name="WorldServerExecutable" xml:space="preserve"><value>Файл WorldServer</value></data>
+  <data name="WorldServerArguments" xml:space="preserve"><value>Аргументы WorldServer</value></data>
+  <data name="WorldServerPort" xml:space="preserve"><value>Порт WorldServer</value></data>
+  <data name="StartupTimeout" xml:space="preserve"><value>Тайм-аут запуска (секунды)</value></data>
+  <data name="GracefulShutdownTimeout" xml:space="preserve"><value>Тайм-аут штатной остановки (секунды)</value></data>
+  <data name="LogsDirectory" xml:space="preserve"><value>Папка логов</value></data>
+  <data name="SaveSettings" xml:space="preserve"><value>Сохранить настройки</value></data>
+  <data name="SettingsSaved" xml:space="preserve"><value>Настройки сохранены.</value></data>
+  <data name="ConfigurationWarning" xml:space="preserve"><value>Проверьте конфигурацию</value></data>
+  <data name="Port" xml:space="preserve"><value>Порт</value></data>
+  <data name="Open" xml:space="preserve"><value>открыт</value></data>
+  <data name="Closed" xml:space="preserve"><value>закрыт</value></data>
+  <data name="Confirmation" xml:space="preserve"><value>Подтверждение</value></data>
+  <data name="ErrorTitle" xml:space="preserve"><value>Менеджер сервера</value></data>
+  <data name="DatabaseNotRunningStart" xml:space="preserve"><value>База данных не работает. Запустить её?</value></data>
+  <data name="DatabaseHasDependentsStop" xml:space="preserve"><value>Сервер авторизации или игровой сервер работает. Сначала безопасно остановить зависимые службы?</value></data>
+  <data name="DatabaseRestartDependents" xml:space="preserve"><value>Зависимые службы работают. Безопасно остановить их, перезапустить базу данных и запустить их снова?</value></data>
+  <data name="WorldNotRunning" xml:space="preserve"><value>Игровой сервер не работает.</value></data>
+  <data name="WorldNotManaged" xml:space="preserve"><value>Работающий WorldServer был запущен вне менеджера, поэтому его стандартный ввод недоступен.</value></data>
+  <data name="InvalidSettings" xml:space="preserve"><value>Проверьте пути, порты и значения тайм-аутов.</value></data>
+  <data name="OperationFailed" xml:space="preserve"><value>Не удалось выполнить операцию. Подробности находятся в логе менеджера.</value></data>
+  <data name="ValidationServerRootMissing" xml:space="preserve"><value>Корневая папка сервера не существует</value></data>
+  <data name="ValidationAuthMissing" xml:space="preserve"><value>Исполняемый файл AuthServer не найден</value></data>
+  <data name="ValidationWorldMissing" xml:space="preserve"><value>Исполняемый файл WorldServer не найден</value></data>
+  <data name="ValidationConfigsMissing" xml:space="preserve"><value>Папка configs не существует</value></data>
+  <data name="ValidationAuthConfigMissing" xml:space="preserve"><value>Файл authserver.conf не найден</value></data>
+  <data name="ValidationWorldConfigMissing" xml:space="preserve"><value>Файл worldserver.conf не найден</value></data>
+  <data name="ValidationMySqlMissing" xml:space="preserve"><value>Служба MySQL Windows не найдена</value></data>
+  <data name="ValidationAdminRequired" xml:space="preserve"><value>Для управления службами Windows требуются права администратора</value></data>
+</root>
+
