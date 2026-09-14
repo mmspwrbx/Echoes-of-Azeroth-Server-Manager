@@ -7,6 +7,15 @@ namespace EchoesOfAzeroth.ServerManager;
 
 public partial class App : Application
 {
+    internal bool IsShuttingDown { get; private set; }
+
+    internal void BeginShutdown() => IsShuttingDown = true;
+
+    internal bool IsExpectedShutdownCancellation(Exception exception) =>
+        IsShuttingDown &&
+        exception is OperationCanceledException canceled &&
+        canceled.CancellationToken.IsCancellationRequested;
+
     protected override async void OnStartup(StartupEventArgs e)
     {
         base.OnStartup(e);
@@ -71,13 +80,45 @@ public partial class App : Application
         return null;
     }
 
-    private static void OnDispatcherUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e)
+    protected override void OnExit(ExitEventArgs e)
     {
+        BeginShutdown();
+        base.OnExit(e);
+    }
+
+    private void OnDispatcherUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e)
+    {
+        ReportUnhandledException(e.Exception);
+        e.Handled = true;
+    }
+
+    internal void ReportUnhandledException(Exception exception)
+    {
+        if (IsExpectedShutdownCancellation(exception))
+        {
+            return;
+        }
+
+        try
+        {
+            var directory = (MainWindow?.DataContext as MainViewModel)?.Settings.LogsDirectory ??
+                            Path.Combine(
+                                Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+                                "EchoesOfAzeroth", "ServerManager", "logs");
+            Directory.CreateDirectory(directory);
+            var path = Path.Combine(directory, $"manager-{DateTimeOffset.Now:yyyy-MM-dd}.log");
+            File.AppendAllText(path,
+                $"[{DateTimeOffset.Now:yyyy-MM-dd HH:mm:ss.fff zzz}] ERROR Unhandled application exception.{Environment.NewLine}{exception}{Environment.NewLine}");
+        }
+        catch
+        {
+            // The global error dialog must remain available even if log storage fails.
+        }
+
         MessageBox.Show(
             "An unexpected error occurred. Full details were written to the manager log.",
             "Server Manager",
             MessageBoxButton.OK,
             MessageBoxImage.Error);
-        e.Handled = true;
     }
 }

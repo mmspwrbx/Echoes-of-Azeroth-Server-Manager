@@ -10,6 +10,7 @@ public abstract class AzerothProcessManager : IAsyncDisposable
     private ComponentStatus _status = ComponentStatus.Stopped;
     private bool _portOpen;
     private bool _expectedStop;
+    private int _disposed;
 
     protected AzerothProcessManager(AppSettings settings, PortMonitor portMonitor, LoggingService logger)
     {
@@ -381,6 +382,11 @@ public abstract class AzerothProcessManager : IAsyncDisposable
 
     public virtual ValueTask DisposeAsync()
     {
+        if (Interlocked.Exchange(ref _disposed, 1) != 0)
+        {
+            return ValueTask.CompletedTask;
+        }
+
         ClearProcess();
         OperationGate.Dispose();
         return ValueTask.CompletedTask;

@@ -8,8 +8,27 @@
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <AssemblyName>EchoesOfAzeroth.ServerManager</AssemblyName>
     <RootNamespace>EchoesOfAzeroth.ServerManager</RootNamespace>
-    <ApplicationIcon />
+    <Product>Echoes of Azeroth Server Manager</Product>
+    <Title>Echoes of Azeroth Server Manager</Title>
+    <AssemblyTitle>Echoes of Azeroth Server Manager</AssemblyTitle>
+    <Description>Desktop management application for the Echoes of Azeroth AzerothCore server.</Description>
+    <Company>Echoes of Azeroth</Company>
+    <Authors>Echoes of Azeroth</Authors>
+    <Copyright>Copyright © 2026 Echoes of Azeroth</Copyright>
+    <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
+    <ApplicationIcon Condition="Exists('Assets\AppIcon.ico')">Assets\AppIcon.ico</ApplicationIcon>
   </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)' == 'Release'">
+    <Optimize>true</Optimize>
+    <DebugSymbols>false</DebugSymbols>
+    <DebugType>None</DebugType>
+  </PropertyGroup>
+
+  <ItemGroup Condition="Exists('Assets\AppIcon.ico')">
+    <None Remove="Assets\AppIcon.ico" />
+    <Resource Include="Assets\AppIcon.ico" />
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="System.ServiceProcess.ServiceController" Version="9.0.0" />

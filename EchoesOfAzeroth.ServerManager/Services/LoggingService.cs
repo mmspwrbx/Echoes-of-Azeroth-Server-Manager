@@ -7,7 +7,9 @@ public sealed class LoggingService : IAsyncDisposable
 {
     private string _logDirectory;
     private readonly SemaphoreSlim _fileGate = new(1, 1);
-    private readonly CancellationTokenSource _shutdown = new();
+    private readonly object _lifecycleSync = new();
+    private readonly HashSet<Task> _pendingWrites = [];
+    private Task? _disposeTask;
 
     public LoggingService(string logDirectory)
     {
@@ -31,29 +33,42 @@ public sealed class LoggingService : IAsyncDisposable
         EntryAdded?.Invoke(this, entry);
         if (entry.Channel == LogChannel.Manager)
         {
-            _ = PersistManagerEntryAsync(entry, _shutdown.Token);
+            lock (_lifecycleSync)
+            {
+                if (_disposeTask is not null)
+                {
+                    return;
+                }
+
+                var writeTask = PersistManagerEntryAsync(entry);
+                _pendingWrites.Add(writeTask);
+                _ = writeTask.ContinueWith(completed =>
+                {
+                    lock (_lifecycleSync)
+                    {
+                        _pendingWrites.Remove(completed);
+                    }
+                }, CancellationToken.None, TaskContinuationOptions.ExecuteSynchronously, TaskScheduler.Default);
+            }
         }
     }
 
-    private async Task PersistManagerEntryAsync(LogEntry entry, CancellationToken cancellationToken)
+    private async Task PersistManagerEntryAsync(LogEntry entry)
     {
         try
         {
             Directory.CreateDirectory(_logDirectory);
             var path = Path.Combine(_logDirectory, $"manager-{entry.Timestamp:yyyy-MM-dd}.log");
             var line = $"[{entry.Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz}] {(entry.IsError ? "ERROR" : "INFO ")} {entry.Message}{Environment.NewLine}";
-            await _fileGate.WaitAsync(cancellationToken).ConfigureAwait(false);
+            await _fileGate.WaitAsync().ConfigureAwait(false);
             try
             {
-                await File.AppendAllTextAsync(path, line, Encoding.UTF8, cancellationToken).ConfigureAwait(false);
+                await File.AppendAllTextAsync(path, line, Encoding.UTF8).ConfigureAwait(false);
             }
             finally
             {
                 _fileGate.Release();
             }
-        }
-        catch (OperationCanceledException)
-        {
         }
         catch
         {
@@ -61,12 +76,17 @@ public sealed class LoggingService : IAsyncDisposable
         }
     }
 
-    public async ValueTask DisposeAsync()
+    public ValueTask DisposeAsync()
     {
-        _shutdown.Cancel();
-        await _fileGate.WaitAsync().ConfigureAwait(false);
-        _fileGate.Release();
+        lock (_lifecycleSync)
+        {
+            return new ValueTask(_disposeTask ??= DisposeCoreAsync(_pendingWrites.ToArray()));
+        }
+    }
+
+    private async Task DisposeCoreAsync(Task[] pendingWrites)
+    {
+        await Task.WhenAll(pendingWrites).ConfigureAwait(false);
         _fileGate.Dispose();
-        _shutdown.Dispose();
     }
 }

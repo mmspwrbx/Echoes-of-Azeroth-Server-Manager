@@ -1,7 +1,9 @@
 using System.Collections.Specialized;
 using System.ComponentModel;
+using System.IO;
 using System.Windows;
 using System.Windows.Input;
+using System.Windows.Media.Imaging;
 using EchoesOfAzeroth.ServerManager.ViewModels;
 
 namespace EchoesOfAzeroth.ServerManager;
@@ -10,11 +12,14 @@ public partial class MainWindow : Window
 {
     private readonly MainViewModel _viewModel;
     private bool _initialized;
+    private bool _shutdownInProgress;
     private bool _closingAfterCleanup;
+    private Task? _initializationTask;
 
     public MainWindow()
     {
         InitializeComponent();
+        ApplyWindowIcon();
         _viewModel = null!;
     }
 
@@ -58,7 +63,30 @@ public partial class MainWindow : Window
     private void ToggleMaximizedState() =>
         WindowState = WindowState == WindowState.Maximized ? WindowState.Normal : WindowState.Maximized;
 
-    private async void OnLoaded(object sender, RoutedEventArgs e)
+    private void ApplyWindowIcon()
+    {
+        try
+        {
+            var resource = Application.GetResourceStream(
+                new Uri("pack://application:,,,/Assets/AppIcon.ico", UriKind.Absolute));
+            if (resource is null)
+            {
+                return;
+            }
+
+            using var stream = resource.Stream;
+            Icon = BitmapFrame.Create(
+                stream,
+                BitmapCreateOptions.PreservePixelFormat,
+                BitmapCacheOption.OnLoad);
+        }
+        catch (IOException)
+        {
+            // The branded icon is optional until Assets/AppIcon.ico is supplied.
+        }
+    }
+
+    private void OnLoaded(object sender, RoutedEventArgs e)
     {
         if (_initialized)
         {
@@ -66,7 +94,23 @@ public partial class MainWindow : Window
         }
 
         _initialized = true;
-        await _viewModel.InitializeAsync();
+        _initializationTask = InitializeWithErrorHandlingAsync();
+    }
+
+    private async Task InitializeWithErrorHandlingAsync()
+    {
+        try
+        {
+            await _viewModel.InitializeAsync();
+        }
+        catch (OperationCanceledException exception) when (Application.Current is App app && app.IsExpectedShutdownCancellation(exception))
+        {
+            // Closing during initial validation is an expected cancellation.
+        }
+        catch (Exception exception)
+        {
+            (Application.Current as App)?.ReportUnhandledException(exception);
+        }
     }
 
     private async void OnClosing(object? sender, CancelEventArgs e)
@@ -77,11 +121,49 @@ public partial class MainWindow : Window
         }
 
         e.Cancel = true;
+        if (_shutdownInProgress)
+        {
+            return;
+        }
+
+        _shutdownInProgress = true;
         IsEnabled = false;
-        await _viewModel.PrepareForExitAsync();
-        await _viewModel.DisposeAsync();
-        _closingAfterCleanup = true;
-        Close();
+        var app = Application.Current as App;
+        app?.BeginShutdown();
+        _viewModel.BeginShutdown();
+        try
+        {
+            if (_initializationTask is not null)
+            {
+                await _initializationTask;
+            }
+
+            await _viewModel.PrepareForExitAsync();
+        }
+        catch (OperationCanceledException exception) when (app?.IsExpectedShutdownCancellation(exception) == true)
+        {
+        }
+        catch (Exception exception)
+        {
+            app?.ReportUnhandledException(exception);
+        }
+        finally
+        {
+            try
+            {
+                await _viewModel.DisposeAsync();
+            }
+            catch (OperationCanceledException exception) when (app?.IsExpectedShutdownCancellation(exception) == true)
+            {
+            }
+            catch (Exception exception)
+            {
+                app?.ReportUnhandledException(exception);
+            }
+
+            _closingAfterCleanup = true;
+            Close();
+        }
     }
 
     private void OnManagerLogChanged(object? sender, NotifyCollectionChangedEventArgs e) => ScrollToEnd(ManagerLogList);

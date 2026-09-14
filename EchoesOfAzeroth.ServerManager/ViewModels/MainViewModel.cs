@@ -13,6 +13,11 @@ public sealed class MainViewModel : ViewModelBase, IAsyncDisposable
     private readonly AppRuntime _runtime;
     private readonly IDialogService _dialogs;
     private readonly CancellationTokenSource _lifetime = new();
+    private readonly object _lifecycleSync = new();
+    private readonly HashSet<Task<bool>> _activeOperations = [];
+    private Task? _prepareForExitTask;
+    private Task? _disposeTask;
+    private int _shutdownStarted;
     private IReadOnlyList<ValidationIssue> _validationIssues = [];
     private bool _isBusy;
     private string _worldCommandText = string.Empty;
@@ -129,6 +134,11 @@ public sealed class MainViewModel : ViewModelBase, IAsyncDisposable
 
     public async Task InitializeAsync()
     {
+        if (Volatile.Read(ref _shutdownStarted) != 0)
+        {
+            return;
+        }
+
         _runtime.Logging.Info(LogChannel.Manager, "Echoes of Azeroth Server Manager started.");
         await RefreshValidationAsync(_lifetime.Token).ConfigureAwait(true);
         await _runtime.Monitoring.RefreshNowAsync(_lifetime.Token).ConfigureAwait(true);
@@ -136,9 +146,34 @@ public sealed class MainViewModel : ViewModelBase, IAsyncDisposable
         NotifyComponentState();
     }
 
-    public async Task PrepareForExitAsync()
+    public void BeginShutdown()
     {
-        _lifetime.Cancel();
+        if (Interlocked.Exchange(ref _shutdownStarted, 1) == 0)
+        {
+            _lifetime.Cancel();
+        }
+    }
+
+    public Task PrepareForExitAsync()
+    {
+        BeginShutdown();
+        lock (_lifecycleSync)
+        {
+            return _prepareForExitTask ??= PrepareForExitCoreAsync();
+        }
+    }
+
+    private async Task PrepareForExitCoreAsync()
+    {
+        Task<bool>[] activeOperations;
+        lock (_lifecycleSync)
+        {
+            activeOperations = _activeOperations.ToArray();
+        }
+
+        await Task.WhenAll(activeOperations).ConfigureAwait(true);
+        await _runtime.Monitoring.DisposeAsync().ConfigureAwait(true);
+
         using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(
             Math.Max(5, Settings.GracefulShutdownTimeoutSeconds * 2 + 5)));
         try
@@ -301,7 +336,29 @@ public sealed class MainViewModel : ViewModelBase, IAsyncDisposable
         Settings.StartupTimeoutSeconds > 0 &&
         Settings.GracefulShutdownTimeoutSeconds > 0;
 
-    private async Task<bool> RunOperationAsync(Func<CancellationToken, Task> operation)
+    private Task<bool> RunOperationAsync(Func<CancellationToken, Task> operation)
+    {
+        lock (_lifecycleSync)
+        {
+            if (Volatile.Read(ref _shutdownStarted) != 0)
+            {
+                return Task.FromResult(false);
+            }
+
+            var task = RunOperationCoreAsync(operation);
+            _activeOperations.Add(task);
+            _ = task.ContinueWith(completed =>
+            {
+                lock (_lifecycleSync)
+                {
+                    _activeOperations.Remove(completed);
+                }
+            }, CancellationToken.None, TaskContinuationOptions.ExecuteSynchronously, TaskScheduler.Default);
+            return task;
+        }
+    }
+
+    private async Task<bool> RunOperationCoreAsync(Func<CancellationToken, Task> operation)
     {
         if (IsBusy)
         {
@@ -418,15 +475,36 @@ public sealed class MainViewModel : ViewModelBase, IAsyncDisposable
         SaveSettingsCommand.RaiseCanExecuteChanged();
     }
 
-    public async ValueTask DisposeAsync()
+    public ValueTask DisposeAsync()
     {
+        BeginShutdown();
+        lock (_lifecycleSync)
+        {
+            return new ValueTask(_disposeTask ??= DisposeCoreAsync());
+        }
+    }
+
+    private async Task DisposeCoreAsync()
+    {
+        Task<bool>[] activeOperations;
+        lock (_lifecycleSync)
+        {
+            activeOperations = _activeOperations.ToArray();
+        }
+
+        await Task.WhenAll(activeOperations).ConfigureAwait(false);
         _runtime.Logging.EntryAdded -= OnLogEntryAdded;
         _runtime.Database.StateChanged -= OnComponentStateChanged;
         _runtime.AuthServer.StateChanged -= OnComponentStateChanged;
         _runtime.WorldServer.StateChanged -= OnComponentStateChanged;
         _runtime.Localization.PropertyChanged -= OnLocalizationChanged;
-        _lifetime.Cancel();
-        _lifetime.Dispose();
-        await _runtime.DisposeAsync().ConfigureAwait(false);
+        try
+        {
+            await _runtime.DisposeAsync().ConfigureAwait(false);
+        }
+        finally
+        {
+            _lifetime.Dispose();
+        }
     }
 }

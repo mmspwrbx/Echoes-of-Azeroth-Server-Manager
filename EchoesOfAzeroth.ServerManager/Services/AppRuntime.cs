@@ -4,6 +4,9 @@ namespace EchoesOfAzeroth.ServerManager.Services;
 
 public sealed class AppRuntime : IAsyncDisposable
 {
+    private readonly object _disposeSync = new();
+    private Task? _disposeTask;
+
     private AppRuntime(
         SettingsService settingsService,
         AppSettings settings,
@@ -66,11 +69,29 @@ public sealed class AppRuntime : IAsyncDisposable
             validation);
     }
 
-    public async ValueTask DisposeAsync()
+    public ValueTask DisposeAsync()
     {
-        await Monitoring.DisposeAsync().ConfigureAwait(false);
-        await WorldServer.DisposeAsync().ConfigureAwait(false);
-        await AuthServer.DisposeAsync().ConfigureAwait(false);
-        await Logging.DisposeAsync().ConfigureAwait(false);
+        lock (_disposeSync)
+        {
+            return new ValueTask(_disposeTask ??= DisposeCoreAsync());
+        }
+    }
+
+    private async Task DisposeCoreAsync()
+    {
+        var errors = new List<Exception>();
+        try { await Monitoring.DisposeAsync().ConfigureAwait(false); }
+        catch (Exception exception) { errors.Add(exception); }
+        try { await WorldServer.DisposeAsync().ConfigureAwait(false); }
+        catch (Exception exception) { errors.Add(exception); }
+        try { await AuthServer.DisposeAsync().ConfigureAwait(false); }
+        catch (Exception exception) { errors.Add(exception); }
+        try { await Logging.DisposeAsync().ConfigureAwait(false); }
+        catch (Exception exception) { errors.Add(exception); }
+
+        if (errors.Count > 0)
+        {
+            throw new AggregateException("One or more runtime services failed to dispose.", errors);
+        }
     }
 }

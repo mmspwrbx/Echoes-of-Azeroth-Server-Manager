@@ -20,9 +20,12 @@ An open-source Windows desktop manager for running and monitoring an AzerothCore
 ## Requirements
 
 - Windows 10 or Windows 11
-- [.NET 9 SDK](https://dotnet.microsoft.com/download/dotnet/9.0)
-- Visual Studio 2022 17.12 or newer with the **.NET desktop development** workload
 - An existing AzerothCore 3.3.5a server installation
+
+The standalone published build includes the .NET runtime. The following development tools are required only when building from source:
+
+- [.NET 9 SDK](https://dotnet.microsoft.com/download/dotnet/9.0) (the repository pins SDK 9.0.318)
+- Visual Studio 2022 17.12 or newer with the **.NET desktop development** workload
 
 ## Build and run
 
@@ -33,6 +36,34 @@ dotnet build .\EchoesOfAzeroth.ServerManager.slnx -c Release
 ```
 
 The executable requests administrator privileges because controlling Windows services requires elevation.
+
+## Production publish
+
+Generate the Windows x64 production release with:
+
+```powershell
+dotnet publish .\EchoesOfAzeroth.ServerManager\EchoesOfAzeroth.ServerManager.csproj -c Release /p:PublishProfile=WinX64
+```
+
+The reusable profile is stored at `EchoesOfAzeroth.ServerManager/Properties/PublishProfiles/WinX64.pubxml`. It creates a self-contained, single-file Windows x64 executable and deliberately leaves trimming and ReadyToRun disabled for predictable WPF compatibility.
+
+Version `0.1.0` is published to:
+
+```text
+C:\Projects\Development\Echoes of Azeroth\release\ServerManager\0.1.0
+```
+
+To prepare a future release, change `VersionPrefix` once in `Directory.Build.props`.
+
+### Application icon
+
+Place the final multi-resolution Windows icon at:
+
+```text
+EchoesOfAzeroth.ServerManager\Assets\AppIcon.ico
+```
+
+The file must be named exactly `AppIcon.ico`. When present, it is used by the generated executable, Windows Explorer, the application window, and the taskbar. The repository intentionally does not include a fake placeholder icon.
 
 ## Download
 

@@ -7,7 +7,9 @@ public sealed class MonitoringService : IAsyncDisposable
     private readonly WorldServerManager _worldServer;
     private readonly LoggingService _logger;
     private readonly CancellationTokenSource _shutdown = new();
+    private readonly object _lifecycleSync = new();
     private Task? _monitorTask;
+    private Task? _disposeTask;
 
     public MonitoringService(
         MySqlServiceManager database,
@@ -23,7 +25,11 @@ public sealed class MonitoringService : IAsyncDisposable
 
     public void Start()
     {
-        _monitorTask ??= MonitorAsync(_shutdown.Token);
+        lock (_lifecycleSync)
+        {
+            ObjectDisposedException.ThrowIf(_disposeTask is not null, this);
+            _monitorTask ??= MonitorAsync(_shutdown.Token);
+        }
     }
 
     public async Task RefreshNowAsync(CancellationToken cancellationToken)
@@ -61,15 +67,31 @@ public sealed class MonitoringService : IAsyncDisposable
         }
     }
 
-    public async ValueTask DisposeAsync()
+    public ValueTask DisposeAsync()
+    {
+        lock (_lifecycleSync)
+        {
+            return new ValueTask(_disposeTask ??= DisposeCoreAsync());
+        }
+    }
+
+    private async Task DisposeCoreAsync()
     {
         _shutdown.Cancel();
-        if (_monitorTask is not null)
+        try
         {
-            await _monitorTask.ConfigureAwait(false);
+            if (_monitorTask is not null)
+            {
+                await _monitorTask.ConfigureAwait(false);
+            }
         }
-
-        _shutdown.Dispose();
+        catch (OperationCanceledException) when (_shutdown.IsCancellationRequested)
+        {
+            // The periodic wait and refresh were interrupted by normal shutdown.
+        }
+        finally
+        {
+            _shutdown.Dispose();
+        }
     }
 }
-
